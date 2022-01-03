@@ -1,0 +1,12 @@
+*.png
+**.png
+*.jpg
+**.jpg
+*.jpeg
+**.jpeg
+*.gif
+**.gif
+
+pickuser.sh
+clientData.json
+
