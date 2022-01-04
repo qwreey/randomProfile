@@ -12,7 +12,7 @@ local function req()
     local _,body = http.request("GET",
         ("https://openapi.naver.com/v1/search/image?query=%s&display=100&start=%d"):format(
             url.urlEncode "프사추천",
-            random(1,200)
+            random(1,5000)
         ),{
             {"X-Naver-Client-Id",clientData.naverClientId};
             {"X-Naver-Client-Secret",clientData.naverClientSecret};
