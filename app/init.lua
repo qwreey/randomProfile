@@ -7,6 +7,7 @@ local prettyPrint = require "pretty-print"
 local stdout = prettyPrint.stdout
 local timer = require "timer"
 local clock = os.clock
+local drawPer = require "drawPer" ---@module "libs.drawper"
 
 local clientData = json.decode(fs.readFileSync "clientData.json")
 local header = {
@@ -14,6 +15,7 @@ local header = {
     {"X-Naver-Client-Secret",clientData.naverClientSecret};
 }
 local maxRetry = 5
+local maxItems = 15
 
 local keywords = {
     "프사추천";
@@ -38,18 +40,14 @@ local keywords = {
     "마동석 프사";
     "캐릭터 프사";
     "인싸 프사";
-    "와꾸 프사";
     "웃긴 프사";
-    "괜찮은 프사";
     "일코 프사";
     "훈이 프사";
     "짱아 프사";
     "훈이 프사";
-    "오토코노코 프사";
     "잼민 프사";
     "크로니 프사";
-    "제로투 프사";
-    "박진영 남친짤";
+    "중국 프사";
 }
 local lenKeywords = #keywords
 
@@ -79,11 +77,39 @@ local function req(retry)
     return pick,keyword
 end
 
-for i=1,20 do
-    local item,keyword = req()
+local items = {}
+local drawPerbar = drawPer.drawPerbar
+local clear = drawPer.clear()
+for i=1,maxItems do
+    stdout:write{clear,drawPerbar(i/maxItems,52)}
+    items[i] = {req()}
+end
+
+stdout:write "\n--------------------- [ Private ] ---------------------\n"
+for index,this in ipairs(items) do
+    local item,keyword = this[1],this[2]
     if not item then
-        stdout:write(("[%d] 검색 결과가 없음 . . . (키워드 : %s)\n"):format(i,keyword))
+        stdout:write(("[%d] 검색 결과가 없음 . . . (키워드 : %s)\n"):format(index,keyword))
     else
-        stdout:write(("[%d] %s\n"):format(i,item.link))
+        stdout:write(("[%d] `%s`||%s||\n"):format(index,item.link,keyword))
+    end
+end
+stdout:write "\n--------------------- [ Public ] ----------------------\n"
+local hider = "■"
+local floor,insert,sub,gsub = math.floor,table.insert,string.sub,string.gsub
+for index,this in ipairs(items) do
+    local item,keyword = this[1],this[2]
+    if not item then
+        stdout:write(("[%d] 검색 결과가 없음 . . . (키워드 : %s)\n"):format(index,keyword))
+    else
+        local link = item.link
+        local picked = {}
+        local linkLen = #link
+        for _ = 1,floor(linkLen/6) do
+            local pick = random(2,linkLen-1,picked)
+            insert(picked,pick)
+            link = sub(link,1,pick-1) .. ":" .. sub(link,pick+1,-1)
+        end
+        stdout:write(("[%d] `%s`\n"):format(index,gsub(link,":",hider)))
     end
 end
